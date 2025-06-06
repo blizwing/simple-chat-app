@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Chat App</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #chat { border: 1px solid #ccc; height: 300px; overflow-y: auto; padding: 10px; margin-bottom: 10px; }
+    #chat div { margin-bottom: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Simple Chat Room</h2>
+  <input id="room" placeholder="Room name" />
+  <button id="join">Join Room</button>
+  <div id="chat"></div>
+  <input id="message" placeholder="Type a message" />
+  <button id="send">Send</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const roomInput = document.getElementById('room');
+    const joinBtn = document.getElementById('join');
+    const chatDiv = document.getElementById('chat');
+    const msgInput = document.getElementById('message');
+    const sendBtn = document.getElementById('send');
+    let currentRoom = '';
+
+    joinBtn.onclick = () => {
+      const room = roomInput.value.trim();
+      if (room) {
+        currentRoom = room;
+        socket.emit('joinRoom', room);
+        appendMessage('BOT', `Joined room ${room}`);
+      }
+    };
+
+    sendBtn.onclick = () => {
+      const msg = msgInput.value.trim();
+      if (msg && currentRoom) {
+        socket.emit('chatMessage', { room: currentRoom, message: msg });
+        appendMessage('You', msg);
+        msgInput.value = '';
+      }
+    };
+
+    socket.on('chatMessage', data => {
+      appendMessage(data.sender, data.message);
+    });
+
+    socket.on('userJoined', msg => {
+      appendMessage('BOT', msg);
+    });
+
+    function appendMessage(sender, message) {
+      const div = document.createElement('div');
+      div.innerHTML = `<strong>${sender}:</strong> ${message}`;
+      chatDiv.appendChild(div);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+  </script>
+</body>
+</html>
