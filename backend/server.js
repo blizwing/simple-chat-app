@@ -4,6 +4,8 @@ import { Server } from 'socket.io';
 
 const app = express();
 const httpServer = createServer(app);
+// Serve static files for a simple built-in GUI
+app.use(express.static('./public'));
 const io = new Server( httpServer, {
     cors: { origin: '*' }
 });
@@ -31,5 +33,5 @@ io.on('connection', (socket) => {
 
 
 httpServer.listen(3000, () => {
-  console.log('🚀 Server listening on http://localhost:3000');
+  console.log('🚀 Server listening on port 3000');
 });
